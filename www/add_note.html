@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Note - EasyNote</title>
+    <link rel="stylesheet" href="css/add_note.css">
+</head>
+<body>
+    <div class="container">
+        <button class="back-btn" onclick="navigateToMainPage()">&larr;</button>
+        <h1>EASYNOTE</h1>
+        <div class="form-group">
+            <label for="noteTitle">Title:</label>
+            <input type="text" id="noteTitle" placeholder="Enter title">
+        </div>
+        <div class="form-group">
+            <label for="noteContent">Content:</label>
+            <textarea id="noteContent" placeholder="Enter content"></textarea>
+        </div>
+        <div class="button-group">
+            <button class="save-btn" id="saveButton">Save</button>
+            <button class="delete-btn" onclick="clearFields()">Clear</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+        const firebaseConfig = {
+    apiKey: "AIzaSyBNvCB2SH1hrc0RnWGwwwaVu-NS5OQtKqs",
+    authDomain: "note-29f95.firebaseapp.com",
+    projectId: "note-29f95",
+    storageBucket: "note-29f95.appspot.com",
+    messagingSenderId: "426343262730",
+    appId: "1:426343262730:web:7dfafbb484a05750f38df3"
+  };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        function navigateToMainPage() {
+            window.location.href = "index.html";
+        }
+
+        function saveNote() {
+            const title = document.getElementById('noteTitle').value;
+            const content = document.getElementById('noteContent').value;
+
+            if (title) {
+                const notesRef = ref(database, 'notes');
+                const newNoteRef = push(notesRef);
+                set(newNoteRef, {
+                    title: title,
+                    content: content
+                }).then(() => {
+                    navigateToMainPage();
+                }).catch((error) => {
+                    console.error("Error adding note: ", error);
+                });
+            } else {
+                alert("Please enter a note title.");
+            }
+        }
+
+        function clearFields() {
+            document.getElementById('noteTitle').value = '';
+            document.getElementById('noteContent').value = '';
+        }
+
+        // Event listener for the Save button
+        document.getElementById('saveButton').addEventListener('click', saveNote);
+    </script>
+</body>
+</html>

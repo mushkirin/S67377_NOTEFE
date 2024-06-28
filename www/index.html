@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EasyNote</title>
+    <link rel="stylesheet" href="css/index.css">
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+        const firebaseConfig = {
+    apiKey: "AIzaSyBNvCB2SH1hrc0RnWGwwwaVu-NS5OQtKqs",
+    authDomain: "note-29f95.firebaseapp.com",
+    projectId: "note-29f95",
+    storageBucket: "note-29f95.appspot.com",
+    messagingSenderId: "426343262730",
+    appId: "1:426343262730:web:7dfafbb484a05750f38df3"
+  };
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        function displayNotes() {
+            const notesRef = ref(database, 'notes');
+            onValue(notesRef, (snapshot) => {
+                const notesContainer = document.getElementById('notes');
+                notesContainer.innerHTML = '';
+                snapshot.forEach((childSnapshot) => {
+                    const note = childSnapshot.val();
+                    const noteId = childSnapshot.key;
+                    const noteElement = document.createElement('div');
+                    noteElement.className = 'note';
+                    noteElement.innerHTML = `
+                        <div class="note-info">
+                            <h3>${note.title}</h3>
+                            <p>${note.content}</p>
+                        </div>
+                    `;
+                    noteElement.onclick = function() {
+                        localStorage.setItem('editNoteId', noteId);
+                        localStorage.setItem('editNoteTitle', note.title);
+                        localStorage.setItem('editNoteContent', note.content);
+                        window.location.href = 'edit_note.html';
+                    };
+                    notesContainer.appendChild(noteElement);
+                });
+            });
+        }
+
+        window.onload = function() {
+            displayNotes();
+        }
+
+        window.navigateToAddNote = function() {
+            window.location.href = 'add_note.html';
+        }
+
+        window.searchNotes = function() {
+            const searchTerm = document.getElementById('search').value.toLowerCase();
+            const notes = document.getElementsByClassName('note');
+            for (let note of notes) {
+                const title = note.querySelector('h3').innerText.toLowerCase();
+                const content = note.querySelector('p').innerText.toLowerCase();
+                if (title.includes(searchTerm) || content.includes(searchTerm)) {
+                    note.style.display = 'block';
+                } else {
+                    note.style.display = 'none';
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>EASYNOTE</h1>
+        <h2>Welcome to EasyNote!</h2>
+        <button class="add-note-btn" onclick="navigateToAddNote()">
+            <img src="img/add.png" alt="Add Note"> Add new note
+        </button>
+        <div class="search-bar">
+            <img src="img/search.png" alt="Search Icon" class="search-icon">
+            <input type="text" id="search" placeholder="Search" oninput="searchNotes()">
+        </div>
+        <div id="notes" class="notes-container"></div>
+    </div>
+
+</body>
+</html>

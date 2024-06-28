@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Note - EasyNote</title>
+    <link rel="stylesheet" href="css/edit_note.css">
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getDatabase, ref, update, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+        const firebaseConfig = {
+    apiKey: "AIzaSyBNvCB2SH1hrc0RnWGwwwaVu-NS5OQtKqs",
+    authDomain: "note-29f95.firebaseapp.com",
+    projectId: "note-29f95",
+    storageBucket: "note-29f95.appspot.com",
+    messagingSenderId: "426343262730",
+    appId: "1:426343262730:web:7dfafbb484a05750f38df3"
+  };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        window.navigateToMainPage = function() {
+            window.location.href = "index.html";
+        }
+
+        window.updateNote = function() {
+            const title = document.getElementById('editNoteTitle').value;
+            const content = document.getElementById('editNoteContent').value;
+            const noteId = localStorage.getItem('editNoteId');
+
+            if (noteId && title) {
+                const noteRef = ref(database, 'notes/' + noteId);
+                update(noteRef, {
+                    title: title,
+                    content: content
+                }).then(() => {
+                    navigateToMainPage();
+                }).catch((error) => {
+                    console.error("Error updating note: ", error);
+                });
+            } else {
+                alert("Please enter a note title.");
+            }
+        }
+
+        window.deleteNote = function() {
+            const noteId = localStorage.getItem('editNoteId');
+
+            if (noteId) {
+                const noteRef = ref(database, 'notes/' + noteId);
+                remove(noteRef).then(() => {
+                    navigateToMainPage();
+                }).catch((error) => {
+                    console.error("Error deleting note: ", error);
+                });
+            } else {
+                alert("No note selected to delete.");
+            }
+        }
+
+        window.onload = function() {
+            const title = localStorage.getItem('editNoteTitle');
+            const content = localStorage.getItem('editNoteContent');
+
+            document.getElementById('editNoteTitle').value = title || '';
+            document.getElementById('editNoteContent').value = content || '';
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <button class="back-btn" onclick="navigateToMainPage()">&larr;</button>
+        <h1>Edit Note</h1>
+        <div class="form-group">
+            <label for="editNoteTitle">Title:</label>
+            <input type="text" id="editNoteTitle" placeholder="Enter title">
+        </div>
+        <div class="form-group">
+            <label for="editNoteContent">Content:</label>
+            <textarea id="editNoteContent" placeholder="Enter content"></textarea>
+        </div>
+        <div class="button-group">
+            <button class="save-btn" onclick="updateNote()">Save</button>
+            <button class="delete-btn" onclick="deleteNote()">Delete</button>
+        </div>
+    </div>
+</body>
+</html>
